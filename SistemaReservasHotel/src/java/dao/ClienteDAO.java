@@ -7,6 +7,7 @@ import java.util.List;
 
 public class ClienteDAO {
     
+    // ✅ Agregar nuevo cliente
     public boolean agregarCliente(Cliente c) {
         String sql = "INSERT INTO cliente (nombre, edad, sexo, nacionalidad, ha_visitado) VALUES (?, ?, ?, ?, ?)";
         try (Connection con = Conexion.getConexion();
@@ -24,6 +25,7 @@ public class ClienteDAO {
         return false;
     }
 
+    // ✅ Listar todos los clientes
     public List<Cliente> listarClientes() {
         List<Cliente> lista = new ArrayList<>();
         String sql = "SELECT * FROM cliente";
@@ -46,4 +48,68 @@ public class ClienteDAO {
         }
         return lista;
     }
+
+    // ✅ Este método nuevo sirve para el JSP de reservas
+    public List<Cliente> listar() {
+        return listarClientes();
+    }
+
+    // ✅ Obtener cliente por ID
+    public Cliente obtenerClientePorId(int id) {
+        Cliente c = null;
+        String sql = "SELECT * FROM cliente WHERE id = ?";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    c = new Cliente(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getInt("edad"),
+                        rs.getString("sexo"),
+                        rs.getString("nacionalidad"),
+                        rs.getBoolean("ha_visitado")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener cliente: " + e.getMessage());
+        }
+        return c;
+    }
+
+    // ✅ Actualizar cliente
+    public boolean actualizarCliente(Cliente c) {
+        String sql = "UPDATE cliente SET nombre = ?, edad = ?, sexo = ?, nacionalidad = ?, ha_visitado = ? WHERE id = ?";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, c.getNombre());
+            ps.setInt(2, c.getEdad());
+            ps.setString(3, c.getSexo());
+            ps.setString(4, c.getNacionalidad());
+            ps.setBoolean(5, c.isHaVisitado());
+            ps.setInt(6, c.getId());
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar cliente: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // ✅ Eliminar cliente
+    public boolean eliminarCliente(int id) {
+        String sql = "DELETE FROM cliente WHERE id = ?";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Error al eliminar cliente: " + e.getMessage());
+        }
+        return false;
+    }
 }
+

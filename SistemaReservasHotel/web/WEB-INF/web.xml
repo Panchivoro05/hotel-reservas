@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+    
+    <display-name>Sistema de Reservación de Hoteles</display-name>
+
+    <!-- Mapeos de servlets -->
+    <servlet>
+        <servlet-name>ClienteServlet</servlet-name>
+        <servlet-class>controladores.ClienteServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ClienteServlet</servlet-name>
+        <url-pattern>/ClienteServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ReservaServlet</servlet-name>
+        <servlet-class>controladores.ReservaServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReservaServlet</servlet-name>
+        <url-pattern>/ReservaServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>EditarReservacionServlet</servlet-name>
+        <servlet-class>controladores.EditarReservacionServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>HabitacionServlet</servlet-name>
+        <servlet-class>controladores.HabitacionServlet</servlet-class>
+    </servlet>
+
+<servlet-mapping>
+    <servlet-name>HabitacionServlet</servlet-name>
+    <url-pattern>/HabitacionServlet</url-pattern>
+</servlet-mapping>
+
+
+    <servlet-mapping>
+        <servlet-name>EditarReservacionServlet</servlet-name>
+        <url-pattern>/EditarReservacionServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- Página por defecto -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+</web-app>
