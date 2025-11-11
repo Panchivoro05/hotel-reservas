@@ -37,14 +37,25 @@ public class ClienteServlet extends HttpServlet {
             case "eliminar":
                 // Eliminar cliente
                 int idEliminar = Integer.parseInt(request.getParameter("id"));
-                clienteDAO.eliminarCliente(idEliminar);
-                response.sendRedirect("ClienteServlet");
+                boolean eliminado = clienteDAO.eliminarCliente(idEliminar);
+
+                if (eliminado) {
+                    request.setAttribute("mensaje", "✅ Cliente eliminado correctamente.");
+                } else {
+                    request.setAttribute("error", "⚠️ No se pudo eliminar el cliente. Verifique que no tenga reservaciones activas.");
+                }
+
+                // 🔹 Volver a listar los clientes después de eliminar
+                List<Cliente> lista = clienteDAO.listarClientes();
+                request.setAttribute("listaClientes", lista);
+                RequestDispatcher rdListarDespues = request.getRequestDispatcher("listarClientes.jsp");
+                rdListarDespues.forward(request, response);
                 break;
 
             default:
                 // Listar todos los clientes
-                List<Cliente> lista = clienteDAO.listarClientes();
-                request.setAttribute("listaClientes", lista);
+                List<Cliente> listaClientes = clienteDAO.listarClientes();
+                request.setAttribute("listaClientes", listaClientes);
                 RequestDispatcher rdListar = request.getRequestDispatcher("listarClientes.jsp");
                 rdListar.forward(request, response);
                 break;
@@ -66,8 +77,15 @@ public class ClienteServlet extends HttpServlet {
             c.setNacionalidad(request.getParameter("nacionalidad"));
             c.setHaVisitado(Boolean.parseBoolean(request.getParameter("haVisitado")));
 
-            clienteDAO.agregarCliente(c);
-            response.sendRedirect("ClienteServlet");
+            boolean exito = clienteDAO.agregarCliente(c);
+            if (exito) {
+                request.setAttribute("mensaje", "✅ Cliente registrado correctamente.");
+            } else {
+                request.setAttribute("error", "❌ Error al registrar cliente.");
+            }
+
+            RequestDispatcher rd = request.getRequestDispatcher("agregarCliente.jsp");
+            rd.forward(request, response);
 
         } else if ("actualizar".equals(action)) {
             // Actualizar cliente existente
@@ -79,8 +97,15 @@ public class ClienteServlet extends HttpServlet {
             c.setNacionalidad(request.getParameter("nacionalidad"));
             c.setHaVisitado(Boolean.parseBoolean(request.getParameter("haVisitado")));
 
-            clienteDAO.actualizarCliente(c);
-            response.sendRedirect("ClienteServlet");
+            boolean actualizado = clienteDAO.actualizarCliente(c);
+            if (actualizado) {
+                request.setAttribute("mensaje", "✅ Cliente actualizado correctamente.");
+            } else {
+                request.setAttribute("error", "❌ Error al actualizar cliente.");
+            }
+
+            RequestDispatcher rd = request.getRequestDispatcher("editarCliente.jsp");
+            rd.forward(request, response);
         }
     }
 }

@@ -3,13 +3,7 @@
 <%
     int id = Integer.parseInt(request.getParameter("id"));
     ReservacionDAO dao = new ReservacionDAO();
-    Reservacion reserva = null;
-    for (Reservacion r : dao.listarPorTipo("RECEPCION")) {
-        if (r.getId() == id) { 
-            reserva = r; 
-            break; 
-        }
-    }
+    Reservacion reserva = dao.obtenerPorId(id);
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -20,7 +14,7 @@
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar unificada -->
+<!-- 🔹 Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="index.jsp">🏨 Sistema de Reservación</a>
@@ -34,7 +28,7 @@
     </div>
 </nav>
 
-<!-- 🔹 Contenido principal -->
+<!-- 🔹 Contenedor principal -->
 <div class="container mt-5">
     <div class="card shadow mx-auto" style="max-width: 600px;">
         <div class="card-header bg-warning text-white">
@@ -45,41 +39,60 @@
             <%
                 if (reserva == null) {
             %>
-                <div class="alert alert-danger text-center">⚠️ Reservación no encontrada.</div>
+                <div class="alert alert-danger text-center">
+                    ⚠️ Reservación no encontrada.
+                </div>
             <%
                 } else {
             %>
-            <form action="EditarReservacionServlet" method="post">
+            <form action="ReservaServlet?action=actualizar" method="post">
                 <input type="hidden" name="id" value="<%= reserva.getId() %>">
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Fecha de Entrada:</label>
-                    <input type="date" name="nuevaFecha" 
-                           value="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(reserva.getFechaEntrada()) %>" 
+                    <input type="date" name="fechaEntrada"
+                           value="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(reserva.getFechaEntrada()) %>"
                            class="form-control" required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Días de Estadia:</label>
-                    <input type="number" name="nuevosDias" 
-                           value="<%= reserva.getDiasEstadia() %>" 
+                    <input type="number" name="diasEstadia" value="<%= reserva.getDiasEstadia() %>"
                            class="form-control" min="1" required>
                 </div>
 
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-warning text-white fw-semibold">💾 Guardar Cambios</button>
+                    <button type="submit" class="btn btn-warning text-white fw-semibold">
+                        💾 Guardar Cambios
+                    </button>
                 </div>
             </form>
             <%
                 }
             %>
 
-            <!-- Mensaje de confirmación -->
+            <!-- 🔹 Mostrar mensajes -->
             <%
-                if (request.getAttribute("mensaje") != null) {
+                String mensaje = (String) request.getAttribute("mensaje");
+                String error = (String) request.getAttribute("error");
+                if (mensaje != null) {
             %>
-                <div class="alert alert-success mt-3 text-center">
-                    <%= request.getAttribute("mensaje") %>
+                <div class="alert alert-success mt-4 text-center fw-semibold shadow-sm">
+                    <%= mensaje %><br>
+                    <small>Redirigiendo al listado de reservaciones...</small>
+                </div>
+
+                <!-- 🔁 Redirección automática -->
+                <script>
+                    setTimeout(() => {
+                        window.location.href = "ReservaServlet";
+                    }, 3000);
+                </script>
+            <%
+                } else if (error != null) {
+            %>
+                <div class="alert alert-danger mt-4 text-center fw-semibold shadow-sm">
+                    <%= error %>
                 </div>
             <%
                 }

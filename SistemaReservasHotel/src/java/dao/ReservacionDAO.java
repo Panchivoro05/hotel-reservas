@@ -7,6 +7,7 @@ import java.util.List;
 
 public class ReservacionDAO {
 
+    // 🔹 Verifica si una habitación está ocupada en un rango de fechas
     private boolean habitacionOcupada(int idHabitacion, Date fechaEntrada, int dias) {
         String sql = "SELECT * FROM reservacion WHERE id_habitacion = ? " +
                      "AND (fecha_entrada <= DATE_ADD(?, INTERVAL ? DAY) " +
@@ -25,6 +26,27 @@ public class ReservacionDAO {
         return false;
     }
 
+    // 🔹 Verifica si una habitación está ocupada al actualizar (excluye la reserva actual)
+    private boolean habitacionOcupadaEnRango(int idHabitacion, Date nuevaFecha, int nuevosDias, int idReservacionActual) {
+        String sql = "SELECT * FROM reservacion WHERE id_habitacion = ? AND id <> ? " +
+                     "AND (fecha_entrada <= DATE_ADD(?, INTERVAL ? DAY) " +
+                     "AND DATE_ADD(fecha_entrada, INTERVAL dias_estadia DAY) >= ?)";
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idHabitacion);
+            ps.setInt(2, idReservacionActual);
+            ps.setDate(3, nuevaFecha);
+            ps.setInt(4, nuevosDias);
+            ps.setDate(5, nuevaFecha);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            System.out.println("Error al verificar habitación (actualización): " + e.getMessage());
+        }
+        return false;
+    }
+
+    // 🔹 Agregar una nueva reservación
     public boolean agregarReservacion(Reservacion r) {
         if (habitacionOcupada(r.getHabitacion().getId(), r.getFechaEntrada(), r.getDiasEstadia())) {
             return false;
@@ -34,23 +56,25 @@ public class ReservacionDAO {
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, r.getCodigo());
             ps.setInt(2, r.getCliente().getId());
             ps.setInt(3, r.getHabitacion().getId());
+
             if (r.getTuroperador() != null) {
                 ps.setInt(4, r.getTuroperador().getId());
             } else {
                 ps.setNull(4, java.sql.Types.INTEGER);
             }
+
             ps.setDate(5, r.getFechaEntrada());
             ps.setInt(6, r.getDiasEstadia());
             ps.setBoolean(7, r.isEsTour());
             ps.setString(8, r.getTipoReservacion());
             ps.executeUpdate();
 
-            // 🔹 Marcar habitación como OCUPADA
-            HabitacionDAO habitacionDAO = new HabitacionDAO();
-            habitacionDAO.actualizarEstado(r.getHabitacion().getId(), "OCUPADA");
+            // 🔹 Marcar habitación como ocupada
+            new HabitacionDAO().actualizarEstado(r.getHabitacion().getId(), "OCUPADA");
 
             return true;
         } catch (SQLException e) {
@@ -59,8 +83,8 @@ public class ReservacionDAO {
         return false;
     }
 
-
-   public List<Reservacion> listar() {
+    // 🔹 Listar todas las reservaciones
+    public List<Reservacion> listar() {
         List<Reservacion> lista = new ArrayList<>();
         String sql = """
             SELECT 
@@ -89,6 +113,7 @@ public class ReservacionDAO {
                 habitacion.setTipo(rs.getString("tipo_habitacion"));
 
                 Reservacion r = new Reservacion();
+
                 r.setId(rs.getInt("id"));
                 r.setCodigo(rs.getString("codigo"));
                 r.setFechaEntrada(rs.getDate("fecha_entrada"));
@@ -97,7 +122,6 @@ public class ReservacionDAO {
                 r.setTipoReservacion(rs.getString("tipo_reservacion"));
                 r.setCliente(cliente);
                 r.setHabitacion(habitacion);
-
                 lista.add(r);
             }
         } catch (SQLException e) {
@@ -106,7 +130,7 @@ public class ReservacionDAO {
         return lista;
     }
 
-
+    // 🔹 Obtener reservación por ID
     public Reservacion obtenerPorId(int id) {
         String sql = "SELECT * FROM reservacion WHERE id = ?";
         try (Connection con = Conexion.getConexion();
@@ -129,36 +153,49 @@ public class ReservacionDAO {
         return null;
     }
 
-    public boolean actualizarReservacion(Reservacion r) {
-        String sql = "UPDATE reservacion SET fecha_entrada=?, dias_estadia=? WHERE id=?";
+    // 🔹 Actualizar fecha y duración con validación (punto b)
+    public boolean actualizarFechaYDuracion(int idReservacion, Date nuevaFecha, int nuevosDias) {
+        int idHabitacion = obtenerIdHabitacionPorReserva(idReservacion);
+        if (idHabitacion == 0) {
+            System.out.println("⚠️ No se encontró habitación asociada a la reserva ID: " + idReservacion);
+            return false;
+        }
+
+        // Validar conflicto
+        if (habitacionOcupadaEnRango(idHabitacion, nuevaFecha, nuevosDias, idReservacion)) {
+            System.out.println("🚫 La habitación ya está ocupada en ese nuevo rango de fechas.");
+            return false;
+        }
+
+        String sql = "UPDATE reservacion SET fecha_entrada = ?, dias_estadia = ? WHERE id = ?";
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setDate(1, r.getFechaEntrada());
-            ps.setInt(2, r.getDiasEstadia());
-            ps.setInt(3, r.getId());
-            return ps.executeUpdate() > 0;
+            ps.setDate(1, nuevaFecha);
+            ps.setInt(2, nuevosDias);
+            ps.setInt(3, idReservacion);
+
+            int filas = ps.executeUpdate();
+            System.out.println("✅ Reservación actualizada. Filas afectadas: " + filas);
+            return filas > 0;
         } catch (SQLException e) {
             System.out.println("Error al actualizar reservación: " + e.getMessage());
         }
         return false;
     }
 
+    // 🔹 Eliminar reservación
     public boolean eliminarReservacion(int id) {
         String sql = "DELETE FROM reservacion WHERE id=?";
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // 🔹 Obtener la habitación antes de eliminar la reserva
             int idHabitacion = obtenerIdHabitacionPorReserva(id);
-
             ps.setInt(1, id);
             boolean eliminado = ps.executeUpdate() > 0;
 
             if (eliminado && idHabitacion > 0) {
-                HabitacionDAO habitacionDAO = new HabitacionDAO();
-                habitacionDAO.actualizarEstado(idHabitacion, "DISPONIBLE");
+                new HabitacionDAO().actualizarEstado(idHabitacion, "DISPONIBLE");
             }
-
             return eliminado;
         } catch (SQLException e) {
             System.out.println("Error al eliminar reservación: " + e.getMessage());
@@ -166,7 +203,7 @@ public class ReservacionDAO {
         return false;
     }
 
-    // 🔸 Método auxiliar para recuperar la habitación asociada
+    // 🔹 Obtener ID de habitación de una reservación
     private int obtenerIdHabitacionPorReserva(int idReserva) {
         String sql = "SELECT id_habitacion FROM reservacion WHERE id = ?";
         try (Connection con = Conexion.getConexion();
@@ -181,34 +218,15 @@ public class ReservacionDAO {
         }
         return 0;
     }
-    
-    public boolean actualizarFechaYDuracion(int idReservacion, Date nuevaFecha, int nuevosDias) {
-        String sql = "UPDATE reservacion SET fecha_entrada = ?, dias_estadia = ? WHERE id = ?";
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setDate(1, nuevaFecha);
-            ps.setInt(2, nuevosDias);
-            ps.setInt(3, idReservacion);
-
-            int filas = ps.executeUpdate();
-            return filas > 0;
-
-        } catch (SQLException e) {
-            System.out.println("Error al actualizar reservación: " + e.getMessage());
-        }
-        return false;
-    }
+    // 🔹 Listar por tipo de reservación (Recepción / Turoperador)
     public List<Reservacion> listarPorTipo(String tipoReservacion) {
         List<Reservacion> lista = new ArrayList<>();
         String sql = "SELECT * FROM reservacion WHERE tipo_reservacion = ?";
-
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setString(1, tipoReservacion);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 Reservacion r = new Reservacion();
                 r.setId(rs.getInt("id"));
@@ -219,7 +237,6 @@ public class ReservacionDAO {
                 r.setTipoReservacion(rs.getString("tipo_reservacion"));
                 lista.add(r);
             }
-
         } catch (SQLException e) {
             System.out.println("Error al listar reservaciones por tipo: " + e.getMessage());
         }

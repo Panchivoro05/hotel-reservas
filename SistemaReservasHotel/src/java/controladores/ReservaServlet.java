@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ReservaServlet extends HttpServlet {
 
-    private ReservacionDAO dao = new ReservacionDAO();
+    private ReservacionDAO reservacionDAO = new ReservacionDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -23,32 +23,48 @@ public class ReservaServlet extends HttpServlet {
 
         switch (action) {
             case "nuevo":
-                 // Cargar datos de clientes y habitaciones
+                // 🔹 Cargar datos de clientes y habitaciones disponibles
                 ClienteDAO clienteDAO = new ClienteDAO();
                 HabitacionDAO habitacionDAO = new HabitacionDAO();
 
                 request.setAttribute("clientes", clienteDAO.listarClientes());
                 request.setAttribute("habitaciones", habitacionDAO.listarDisponibles());
 
-                request.getRequestDispatcher("agregarReservacion.jsp").forward(request, response);
+                RequestDispatcher rdNuevo = request.getRequestDispatcher("agregarReservacion.jsp");
+                rdNuevo.forward(request, response);
                 break;
 
             case "editar":
                 int id = Integer.parseInt(request.getParameter("id"));
-                Reservacion reservacion = dao.obtenerPorId(id);
-                request.setAttribute("reservacion", reservacion);
-                request.getRequestDispatcher("editarReservacion.jsp").forward(request, response);
+                Reservacion reserva = reservacionDAO.obtenerPorId(id);
+                request.setAttribute("reservacion", reserva);
+                RequestDispatcher rdEditar = request.getRequestDispatcher("editarReservacion.jsp");
+                rdEditar.forward(request, response);
                 break;
 
             case "eliminar":
-                dao.eliminarReservacion(Integer.parseInt(request.getParameter("id")));
-                response.sendRedirect("ReservaServlet");
+                int idEliminar = Integer.parseInt(request.getParameter("id"));
+                boolean eliminado = reservacionDAO.eliminarReservacion(idEliminar);
+
+                if (eliminado) {
+                    request.setAttribute("mensaje", "✅ Reservación eliminada correctamente.");
+                } else {
+                    request.setAttribute("error", "⚠️ No se pudo eliminar la reservación.");
+                }
+
+                // 🔹 Volver a listar
+                List<Reservacion> listaDespues = reservacionDAO.listar();
+                request.setAttribute("reservaciones", listaDespues);
+                RequestDispatcher rdListar = request.getRequestDispatcher("listarReservaciones.jsp");
+                rdListar.forward(request, response);
                 break;
 
             default:
-                List<Reservacion> lista = dao.listar();
+                // 🔹 Listar todas las reservaciones
+                List<Reservacion> lista = reservacionDAO.listar();
                 request.setAttribute("reservaciones", lista);
-                request.getRequestDispatcher("listarReservaciones.jsp").forward(request, response);
+                RequestDispatcher rdListarDefault = request.getRequestDispatcher("listarReservaciones.jsp");
+                rdListarDefault.forward(request, response);
                 break;
         }
     }
@@ -60,6 +76,7 @@ public class ReservaServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("insertar".equals(action)) {
+            // 🔹 Crear nueva reservación
             Reservacion r = new Reservacion();
             r.setCodigo(request.getParameter("codigo"));
 
@@ -78,62 +95,47 @@ public class ReservaServlet extends HttpServlet {
                 r.setTuroperador(t);
             }
 
-            String fechaStr = request.getParameter("fechaEntrada");
-            Date fechaEntrada = null;
-
-            try {
-                // Si el formato viene como yyyy-MM-dd (correcto)
-                fechaEntrada = Date.valueOf(fechaStr);
-            } catch (IllegalArgumentException e) {
-                try {
-                    // Si viene en formato dd/MM/yyyy (caso regional)
-                    String[] partes = fechaStr.split("/");
-                    fechaEntrada = Date.valueOf(partes[2] + "-" + partes[1] + "-" + partes[0]);
-                } catch (Exception ex) {
-                    throw new ServletException("Formato de fecha inválido: " + fechaStr);
-                }
-            }
-
+            Date fechaEntrada = Date.valueOf(request.getParameter("fechaEntrada"));
             r.setFechaEntrada(fechaEntrada);
-
             r.setDiasEstadia(Integer.parseInt(request.getParameter("diasEstadia")));
             r.setEsTour("on".equals(request.getParameter("esTour")));
             r.setTipoReservacion(request.getParameter("tipoReservacion"));
 
-            boolean exito = dao.agregarReservacion(r);
+            boolean exito = reservacionDAO.agregarReservacion(r);
 
             if (exito) {
-                response.sendRedirect("ReservaServlet");
+                request.setAttribute("mensaje", "✅ Reservación registrada correctamente.");
             } else {
-                request.setAttribute("error", "❌ La habitación seleccionada ya está ocupada.");
-                request.getRequestDispatcher("agregarReservacion.jsp").forward(request, response);
+                request.setAttribute("error", "⚠️ No se pudo registrar la reservación. La habitación ya está ocupada en ese período.");
             }
-        }
 
-        if ("actualizar".equals(action)) {
+            // Volver al formulario con feedback
+            ClienteDAO clienteDAO = new ClienteDAO();
+            HabitacionDAO habitacionDAO = new HabitacionDAO();
+            request.setAttribute("clientes", clienteDAO.listarClientes());
+            request.setAttribute("habitaciones", habitacionDAO.listarDisponibles());
+            RequestDispatcher rd = request.getRequestDispatcher("agregarReservacion.jsp");
+            rd.forward(request, response);
+
+        } else if ("actualizar".equals(action)) {
+            // 🔹 Actualizar reservación existente
             Reservacion r = new Reservacion();
             r.setId(Integer.parseInt(request.getParameter("id")));
-            String fechaStr = request.getParameter("fechaEntrada");
-            Date fechaEntrada = null;
 
-            try {
-                // Si el formato viene como yyyy-MM-dd (correcto)
-                fechaEntrada = Date.valueOf(fechaStr);
-            } catch (IllegalArgumentException e) {
-                try {
-                    // Si viene en formato dd/MM/yyyy (caso regional)
-                    String[] partes = fechaStr.split("/");
-                    fechaEntrada = Date.valueOf(partes[2] + "-" + partes[1] + "-" + partes[0]);
-                } catch (Exception ex) {
-                    throw new ServletException("Formato de fecha inválido: " + fechaStr);
-                }
+            Date nuevaFecha = Date.valueOf(request.getParameter("fechaEntrada"));
+            int nuevosDias = Integer.parseInt(request.getParameter("diasEstadia"));
+
+            // 🔸 Llamada al método con validación de solapamiento
+            boolean actualizado = reservacionDAO.actualizarFechaYDuracion(r.getId(), nuevaFecha, nuevosDias);
+
+            if (actualizado) {
+                request.setAttribute("mensaje", "✅ Reservación actualizada correctamente.");
+            } else {
+                request.setAttribute("error", "⚠️ No se pudo actualizar: la habitación ya está reservada en ese período.");
             }
-            r.setFechaEntrada(fechaEntrada);
 
-            r.setDiasEstadia(Integer.parseInt(request.getParameter("diasEstadia")));
-
-            dao.actualizarReservacion(r);
-            response.sendRedirect("ReservaServlet");
+            RequestDispatcher rd = request.getRequestDispatcher("editarReservacion.jsp");
+            rd.forward(request, response);
         }
     }
 }

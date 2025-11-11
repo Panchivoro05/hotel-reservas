@@ -9,7 +9,7 @@
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar unificada -->
+<!-- 🔹 Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="index.jsp">🏨 Sistema de Reservación</a>
@@ -23,16 +23,13 @@
     </div>
 </nav>
 
-<!-- 🔹 Formulario centrado -->
+<!-- 🔹 Contenido principal -->
 <div class="container mt-5">
     <div class="card shadow-lg mx-auto" style="max-width: 700px; border-radius: 12px;">
-        <div class="card-header bg-primary text-white text-center fw-semibold">
-            🧾 Registrar Nueva Reservación
-        </div>
         <div class="card-body p-4">
+            <h4 class="text-center mb-4 fw-bold text-primary">Registrar Nueva Reservación</h4>
 
             <form action="ReservaServlet?action=insertar" method="post">
-
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Código de Reservación:</label>
                     <input type="text" name="codigo" class="form-control" required>
@@ -64,7 +61,10 @@
                             if (habitaciones != null) {
                                 for (modelo.Habitacion hab : habitaciones) {
                         %>
-                            <option value="<%= hab.getId() %>">Habitación <%= hab.getNumero() %> - <%= hab.getTipo() %></option>
+                            <option value="<%= hab.getId() %>">
+                                Habitación <%= hab.getNumero() %> - <%= hab.getTipo() %> 
+                                (<%= hab.getEstado().equals("DISPONIBLE") ? "Disponible" : "Ocupada" %>)
+                            </option>
                         <% 
                                 }
                             } 
@@ -101,31 +101,33 @@
                 </div>
 
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
-                        💾 Registrar Reservación
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">Registrar Reservación</button>
                 </div>
             </form>
 
-            <!-- 🔹 Mensajes dinámicos -->
-            <%
-                String mensaje = (String) request.getAttribute("mensaje");
-                String error = (String) request.getAttribute("error");
-                if (mensaje != null) {
-            %>
-                <div class="alert alert-success mt-3 text-center"><%= mensaje %></div>
-            <% } else if (error != null) { %>
-                <div class="alert alert-danger mt-3 text-center"><%= error %></div>
+            <!-- 🔹 Mensajes de respuesta -->
+            <% if (request.getAttribute("mensaje") != null) { %>
+                <div class="alert alert-success mt-4 text-center">
+                    <%= request.getAttribute("mensaje") %><br>
+                    <small>Redirigiendo al listado...</small>
+                </div>
+                <!-- Redirección automática -->
+                <script>
+                    setTimeout(() => window.location.href = 'ReservaServlet', 2000);
+                </script>
+            <% } else if (request.getAttribute("error") != null) { %>
+                <div class="alert alert-danger mt-4 text-center">
+                    <%= request.getAttribute("error") %>
+                </div>
             <% } %>
-
         </div>
     </div>
 </div>
 
-<!-- 🔹 Footer -->
 <footer class="text-center text-muted mt-5 mb-3">
     © 2025 - Sistema de Reservación de Hoteles
 </footer>
 
 </body>
 </html>
+
