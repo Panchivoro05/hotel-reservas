@@ -12,7 +12,7 @@
     <!-- 🔹 Barra de navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">🏨 Sistema de Reservación</a>
+            <a class="navbar-brand fw-bold" href="#">Sistema de Reservación</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -23,6 +23,11 @@
                     <li class="nav-item"><a class="nav-link" href="ReservaServlet?tipo=RECEPCION">Reservas Recepción</a></li>
                     <li class="nav-item"><a class="nav-link" href="ReservaServlet?tipo=TUROPERADOR">Reservas Turoperador</a></li>
                     <li class="nav-item"><a class="nav-link" href="ReservaServlet?action=nuevo">Nueva Reservación</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ReporteServlet">Reporte Nacionalidad</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ReporteMesServlet">Reporte Mes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ReporteSexoServlet">Reporte Sexo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="ReporteClientesServlet">Reporte Clientes Frecuentes</a></li>
+
                 </ul>
             </div>
         </div>
@@ -37,32 +42,61 @@
 
         <!-- 🔹 Tarjetas de acceso rápido -->
         <div class="row justify-content-center g-4">
-            <div class="col-md-3">
-                <div class="card shadow border-0 h-100">
-                    <div class="card-body">
+            <div class="col-md-3 d-flex">
+                <div class="card shadow border-0 flex-fill">
+                    <div class="card-body d-flex flex-column">
                         <h4 class="fw-semibold mb-3">👤 Clientes</h4>
-                        <p>Gestiona el registro y la información de los clientes.</p>
-                        <a href="ClienteServlet" class="btn btn-primary w-100">Ir a Clientes</a>
+                        <p class="flex-grow-1">Gestiona el registro y la información de los clientes.</p>
+                        <a href="ClienteServlet" class="btn btn-primary w-100 mt-auto">Ir a Clientes</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <div class="card shadow border-0 h-100">
-                    <div class="card-body">
+            <div class="col-md-3 d-flex">
+                <div class="card shadow border-0 flex-fill">
+                    <div class="card-body d-flex flex-column">
                         <h4 class="fw-semibold mb-3">🏠 Habitaciones</h4>
-                        <p>Administra las habitaciones disponibles y ocupadas.</p>
-                        <a href="HabitacionServlet" class="btn btn-warning text-white w-100">Ir a Habitaciones</a>
+                        <p class="flex-grow-1">Administra las habitaciones disponibles y ocupadas.</p>
+                        <a href="HabitacionServlet" class="btn btn-warning text-white w-100 mt-auto">Ir a Habitaciones</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <div class="card shadow border-0 h-100">
-                    <div class="card-body">
+            <div class="col-md-3 d-flex">
+                <div class="card shadow border-0 flex-fill">
+                    <div class="card-body d-flex flex-column">
                         <h4 class="fw-semibold mb-3">📅 Reservaciones</h4>
-                        <p>Controla y registra las reservaciones activas del hotel.</p>
-                        <a href="ReservaServlet" class="btn btn-success w-100">Ir a Reservaciones</a>
+                        <p class="flex-grow-1">Controla y registra las reservaciones activas del hotel.</p>
+                        <a href="ReservaServlet" class="btn btn-success w-100 mt-auto">Ir a Reservaciones</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 d-flex">
+                <div class="card shadow border-0 flex-fill">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="fw-semibold mb-3">📊 Reporte por Nacionalidad</h4>
+                        <p class="flex-grow-1">Consulta el porcentaje de reservas por país en el mes actual.</p>
+                        <a href="ReporteServlet" class="btn btn-info text-white w-100 mt-auto">Ver Reporte</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 d-flex">
+                <div class="card shadow border-0 flex-fill">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="fw-semibold mb-3">🗓️ Reporte Mes</h4>
+                        <p class="flex-grow-1">Muestra el mes del año pasado con más clientes por nacionalidad.</p>
+                        <a href="ReporteMesServlet" class="btn btn-success w-100 mt-auto">Ver Reporte</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 d-flex">
+                <div class="card shadow border-0 flex-fill">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="fw-semibold mb-3">🚻 Reporte por Sexo</h4>
+                        <p class="flex-grow-1">Muestra el sexo más frecuente por nacionalidad en el año actual.</p>
+                        <a href="ReporteSexoServlet" class="btn btn-secondary w-100 mt-auto">Ver Reporte</a>
                     </div>
                 </div>
             </div>
@@ -77,3 +111,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

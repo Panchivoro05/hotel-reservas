@@ -29,6 +29,14 @@ public class ClienteServlet extends HttpServlet {
                 // Mostrar formulario de edición con los datos del cliente
                 int idEditar = Integer.parseInt(request.getParameter("id"));
                 Cliente cliente = clienteDAO.obtenerClientePorId(idEditar);
+
+                if (cliente == null) {
+                    request.setAttribute("error", "⚠️ El cliente con ID " + idEditar + " no existe.");
+                    RequestDispatcher rdError = request.getRequestDispatcher("listarClientes.jsp");
+                    rdError.forward(request, response);
+                    return;
+                }
+
                 request.setAttribute("cliente", cliente);
                 RequestDispatcher rdEditar = request.getRequestDispatcher("editarCliente.jsp");
                 rdEditar.forward(request, response);
@@ -99,13 +107,14 @@ public class ClienteServlet extends HttpServlet {
 
             boolean actualizado = clienteDAO.actualizarCliente(c);
             if (actualizado) {
-                request.setAttribute("mensaje", "✅ Cliente actualizado correctamente.");
+                // 🔹 Redirigir al listado para evitar error y recargar datos
+                response.sendRedirect("ClienteServlet");
             } else {
                 request.setAttribute("error", "❌ Error al actualizar cliente.");
+                request.setAttribute("cliente", c); // Evita que sea null en el JSP
+                RequestDispatcher rd = request.getRequestDispatcher("editarCliente.jsp");
+                rd.forward(request, response);
             }
-
-            RequestDispatcher rd = request.getRequestDispatcher("editarCliente.jsp");
-            rd.forward(request, response);
         }
     }
 }

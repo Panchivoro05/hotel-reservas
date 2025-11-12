@@ -65,7 +65,7 @@
                                 <td><%= c.getNacionalidad() %></td>
                                 <td><%= c.isHaVisitado() ? "Sí" : "No" %></td>
                                 <td>
-                                    <a href="ClienteServlet?action=editar&id=<%= c.getId() %>" class="btn btn-warning btn-sm">✏️ Editar</a>
+                                    <a href="ClienteServlet?action=editar&id=<%= c.getId() %>" class="btn btn-warning btn-sm text-white">✏️ Editar</a>
                                     <a href="ClienteServlet?action=eliminar&id=<%= c.getId() %>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar cliente?');">🗑️ Eliminar</a>
                                 </td>
                             </tr>

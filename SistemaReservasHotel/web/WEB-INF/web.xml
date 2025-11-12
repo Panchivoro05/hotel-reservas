@@ -48,6 +48,16 @@
         <servlet-name>EditarReservacionServlet</servlet-name>
         <url-pattern>/EditarReservacionServlet</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>ReporteServlet</servlet-name>
+        <servlet-class>controladores.ReporteServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReporteServlet</servlet-name>
+        <url-pattern>/ReporteServlet</url-pattern>
+    </servlet-mapping>
 
     <!-- Página por defecto -->
     <welcome-file-list>

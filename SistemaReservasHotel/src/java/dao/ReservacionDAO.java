@@ -3,7 +3,12 @@ package dao;
 import modelo.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ReservacionDAO {
 
@@ -242,4 +247,143 @@ public class ReservacionDAO {
         }
         return lista;
     }
+    public double porcentajeReservasPorNacionalidad(String nacionalidad) {
+        String sql = """
+            SELECT 
+                COUNT(*) AS total_nacionalidad,
+                (SELECT COUNT(*) 
+                 FROM reservacion r2 
+                 INNER JOIN cliente c2 ON r2.id_cliente = c2.id
+                 WHERE r2.tipo_reservacion = 'Recepcion'
+                 AND MONTH(r2.fecha_entrada) = MONTH(CURDATE())
+                 AND YEAR(r2.fecha_entrada) = YEAR(CURDATE())) AS total_mes
+            FROM reservacion r
+            INNER JOIN cliente c ON r.id_cliente = c.id
+            WHERE c.nacionalidad = ? 
+            AND r.tipo_reservacion = 'Recepcion'
+            AND MONTH(r.fecha_entrada) = MONTH(CURDATE())
+            AND YEAR(r.fecha_entrada) = YEAR(CURDATE());
+        """;
+
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nacionalidad);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                int totalNacionalidad = rs.getInt("total_nacionalidad");
+                int totalMes = rs.getInt("total_mes");
+
+                if (totalMes > 0) {
+                    return (totalNacionalidad * 100.0) / totalMes;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al calcular porcentaje: " + e.getMessage());
+        }
+        return 0;
+    }
+    
+    public List<Map<String, Object>> obtenerMesMayorPorNacionalidad() {
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        String sql = """
+            SELECT c.nacionalidad,
+                   MONTHNAME(r.fecha_entrada) AS mes,
+                   COUNT(*) AS total
+            FROM reservacion r
+            INNER JOIN cliente c ON r.id_cliente = c.id
+            WHERE YEAR(r.fecha_entrada) = YEAR(CURDATE()) - 1
+            GROUP BY c.nacionalidad, MONTH(r.fecha_entrada)
+            ORDER BY c.nacionalidad, total DESC;
+        """;
+
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            // Registrar solo el primer (mayor) mes por nacionalidad
+            Set<String> nacionalidadesProcesadas = new HashSet<>();
+
+            while (rs.next()) {
+                String nacionalidad = rs.getString("nacionalidad");
+                if (!nacionalidadesProcesadas.contains(nacionalidad)) {
+                    Map<String, Object> fila = new HashMap<>();
+                    fila.put("nacionalidad", nacionalidad);
+                    fila.put("mes", rs.getString("mes"));
+                    fila.put("total", rs.getInt("total"));
+
+                    resultado.add(fila);
+                    nacionalidadesProcesadas.add(nacionalidad);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al obtener reporte de mes mayor por nacionalidad: " + e.getMessage());
+        }
+
+        return resultado;
+    }
+    
+    public Map<String, Object> obtenerSexoMasFrecuentePorNacionalidad(String nacionalidad) {
+        Map<String, Object> resultado = new HashMap<>();
+
+        String sql = """
+            SELECT c.sexo, COUNT(*) AS total
+            FROM reservacion r
+            INNER JOIN cliente c ON r.id_cliente = c.id
+            WHERE c.nacionalidad = ? AND YEAR(r.fecha_entrada) = YEAR(CURDATE())
+            GROUP BY c.sexo
+            ORDER BY total DESC
+            LIMIT 1;
+        """;
+
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nacionalidad);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                resultado.put("sexo", rs.getString("sexo"));
+                resultado.put("total", rs.getInt("total"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al obtener sexo más frecuente: " + e.getMessage());
+        }
+
+        return resultado;
+    }
+    
+    public List<Map<String, Object>> obtenerClientesFrecuentes() {
+        List<Map<String, Object>> lista = new ArrayList<>();
+        String sql = """
+            SELECT c.nombre AS cliente, COUNT(r.id) AS total_reservas
+            FROM reservacion r
+            INNER JOIN cliente c ON r.id_cliente = c.id
+            GROUP BY c.nombre
+            ORDER BY total_reservas DESC
+            LIMIT 10
+        """;
+
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> fila = new HashMap<>();
+                fila.put("cliente", rs.getString("cliente"));
+                fila.put("total_reservas", rs.getInt("total_reservas"));
+                lista.add(fila);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al obtener clientes frecuentes: " + e.getMessage());
+        }
+        return lista;
+    }
+
+
+
 }

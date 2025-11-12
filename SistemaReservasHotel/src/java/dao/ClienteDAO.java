@@ -56,27 +56,25 @@ public class ClienteDAO {
 
     // ✅ Obtener cliente por ID
     public Cliente obtenerClientePorId(int id) {
-        Cliente c = null;
+        Cliente cliente = null;
         String sql = "SELECT * FROM cliente WHERE id = ?";
         try (Connection con = Conexion.getConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    c = new Cliente(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getInt("edad"),
-                        rs.getString("sexo"),
-                        rs.getString("nacionalidad"),
-                        rs.getBoolean("ha_visitado")
-                    );
-                }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                cliente = new Cliente();
+                cliente.setId(rs.getInt("id"));
+                cliente.setNombre(rs.getString("nombre"));
+                cliente.setEdad(rs.getInt("edad"));
+                cliente.setSexo(rs.getString("sexo"));
+                cliente.setNacionalidad(rs.getString("nacionalidad"));
+                cliente.setHaVisitado(rs.getBoolean("ha_visitado"));
             }
         } catch (SQLException e) {
-            System.out.println("Error al obtener cliente: " + e.getMessage());
+            System.out.println("Error al obtener cliente por ID: " + e.getMessage());
         }
-        return c;
+        return cliente;
     }
 
     // ✅ Actualizar cliente

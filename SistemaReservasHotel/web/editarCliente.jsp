@@ -37,6 +37,7 @@
                 <input type="hidden" name="action" value="actualizar">
                 <input type="hidden" name="id" value="<%= cliente.getId() %>">
 
+
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Nombre:</label>
                     <input type="text" name="nombre" class="form-control" value="<%= cliente.getNombre() %>" required>
