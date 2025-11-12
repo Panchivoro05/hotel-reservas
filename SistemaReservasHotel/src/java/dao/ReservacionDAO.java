@@ -383,7 +383,40 @@ public class ReservacionDAO {
         }
         return lista;
     }
+    
+    public List<Map<String, Object>> listarClientesPorTuroperador(String codigoTuroperador) {
+        List<Map<String, Object>> lista = new ArrayList<>();
 
+        String sql = """
+            SELECT c.nombre AS cliente, c.nacionalidad, r.fecha_entrada, h.numero AS habitacion
+            FROM reservacion r
+            INNER JOIN cliente c ON r.id_cliente = c.id
+            INNER JOIN habitacion h ON r.id_habitacion = h.id
+            INNER JOIN turoperador t ON r.id_turoperador = t.id
+            WHERE t.codigo = ?
+            ORDER BY r.fecha_entrada ASC
+        """;
 
+        try (Connection con = Conexion.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, codigoTuroperador);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> fila = new HashMap<>();
+                fila.put("cliente", rs.getString("cliente"));
+                fila.put("nacionalidad", rs.getString("nacionalidad"));
+                fila.put("fecha_entrada", rs.getDate("fecha_entrada"));
+                fila.put("habitacion", rs.getString("habitacion"));
+                lista.add(fila);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al listar clientes por turoperador: " + e.getMessage());
+        }
+
+        return lista;
+    }
 
 }

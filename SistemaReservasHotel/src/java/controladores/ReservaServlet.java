@@ -1,8 +1,6 @@
 package controladores;
 
-import dao.ClienteDAO;
-import dao.HabitacionDAO;
-import dao.ReservacionDAO;
+import dao.*;
 import modelo.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -23,12 +21,14 @@ public class ReservaServlet extends HttpServlet {
 
         switch (action) {
             case "nuevo":
-                // 🔹 Cargar datos de clientes y habitaciones disponibles
+                // 🔹 Cargar datos de clientes, habitaciones y turoperadores
                 ClienteDAO clienteDAO = new ClienteDAO();
                 HabitacionDAO habitacionDAO = new HabitacionDAO();
+                TuroperadorDAO turoperadorDAO = new TuroperadorDAO();
 
                 request.setAttribute("clientes", clienteDAO.listarClientes());
                 request.setAttribute("habitaciones", habitacionDAO.listarDisponibles());
+                request.setAttribute("turoperadores", turoperadorDAO.listarTuroperadores());
 
                 RequestDispatcher rdNuevo = request.getRequestDispatcher("agregarReservacion.jsp");
                 rdNuevo.forward(request, response);
@@ -88,19 +88,22 @@ public class ReservaServlet extends HttpServlet {
             h.setId(Integer.parseInt(request.getParameter("idHabitacion")));
             r.setHabitacion(h);
 
-            String idTuro = request.getParameter("idTuroperador");
+            // 🔹 Validar turoperador opcional
+            String idTuro = request.getParameter("id_turoperador");
             if (idTuro != null && !idTuro.isEmpty()) {
                 Turoperador t = new Turoperador();
                 t.setId(Integer.parseInt(idTuro));
                 r.setTuroperador(t);
             }
 
+            // 🔹 Otros campos
             Date fechaEntrada = Date.valueOf(request.getParameter("fechaEntrada"));
             r.setFechaEntrada(fechaEntrada);
             r.setDiasEstadia(Integer.parseInt(request.getParameter("diasEstadia")));
             r.setEsTour("on".equals(request.getParameter("esTour")));
             r.setTipoReservacion(request.getParameter("tipoReservacion"));
 
+            // 🔹 Guardar en BD
             boolean exito = reservacionDAO.agregarReservacion(r);
 
             if (exito) {
@@ -109,11 +112,14 @@ public class ReservaServlet extends HttpServlet {
                 request.setAttribute("error", "⚠️ No se pudo registrar la reservación. La habitación ya está ocupada en ese período.");
             }
 
-            // Volver al formulario con feedback
+            // 🔹 Recargar datos para volver al formulario
             ClienteDAO clienteDAO = new ClienteDAO();
             HabitacionDAO habitacionDAO = new HabitacionDAO();
+            TuroperadorDAO turoperadorDAO = new TuroperadorDAO();
             request.setAttribute("clientes", clienteDAO.listarClientes());
             request.setAttribute("habitaciones", habitacionDAO.listarDisponibles());
+            request.setAttribute("turoperadores", turoperadorDAO.listarTuroperadores());
+
             RequestDispatcher rd = request.getRequestDispatcher("agregarReservacion.jsp");
             rd.forward(request, response);
 
@@ -125,7 +131,6 @@ public class ReservaServlet extends HttpServlet {
             Date nuevaFecha = Date.valueOf(request.getParameter("fechaEntrada"));
             int nuevosDias = Integer.parseInt(request.getParameter("diasEstadia"));
 
-            // 🔸 Llamada al método con validación de solapamiento
             boolean actualizado = reservacionDAO.actualizarFechaYDuracion(r.getId(), nuevaFecha, nuevosDias);
 
             if (actualizado) {
@@ -139,4 +144,5 @@ public class ReservaServlet extends HttpServlet {
         }
     }
 }
+
 

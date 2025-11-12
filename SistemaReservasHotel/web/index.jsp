@@ -10,24 +10,43 @@
 <body class="bg-light">
 
     <!-- 🔹 Barra de navegación -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">Sistema de Reservación</a>
+            <a class="navbar-brand fw-bold text-white" href="index.jsp">🏨 Sistema de Reservación</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="ClienteServlet">Clientes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="HabitacionServlet">Habitaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReservaServlet?tipo=RECEPCION">Reservas Recepción</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReservaServlet?tipo=TUROPERADOR">Reservas Turoperador</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReservaServlet?action=nuevo">Nueva Reservación</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReporteServlet">Reporte Nacionalidad</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReporteMesServlet">Reporte Mes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReporteSexoServlet">Reporte Sexo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="ReporteClientesServlet">Reporte Clientes Frecuentes</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="ClienteServlet">Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="HabitacionServlet">Habitaciones</a></li>
 
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="reservasDropdown" role="button" data-bs-toggle="dropdown">
+                            Reservas
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="ReservaServlet?tipo=RECEPCION">Recepción</a></li>
+                            <li><a class="dropdown-item" href="ReservaServlet?tipo=TUROPERADOR">Turoperador</a></li>
+                            <li><a class="dropdown-item" href="ReservaServlet?action=nuevo">Nueva Reservación</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item"><a class="nav-link text-white" href="TuroperadorServlet">Turoperadores</a></li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="reportesDropdown" role="button" data-bs-toggle="dropdown">
+                            Reportes
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="ReporteServlet">Por Nacionalidad</a></li>
+                            <li><a class="dropdown-item" href="ReporteMesServlet">Por Mes</a></li>
+                            <li><a class="dropdown-item" href="ReporteSexoServlet">Por Sexo</a></li>
+                            <li><a class="dropdown-item" href="ReporteClientesServlet">Clientes Frecuentes</a></li>
+                            <li><a class="dropdown-item" href="ReporteTuroperadorServlet">Clientes por Turoperador</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -75,9 +94,9 @@
             <div class="col-md-3 d-flex">
                 <div class="card shadow border-0 flex-fill">
                     <div class="card-body d-flex flex-column">
-                        <h4 class="fw-semibold mb-3">📊 Reporte por Nacionalidad</h4>
-                        <p class="flex-grow-1">Consulta el porcentaje de reservas por país en el mes actual.</p>
-                        <a href="ReporteServlet" class="btn btn-info text-white w-100 mt-auto">Ver Reporte</a>
+                        <h4 class="fw-semibold mb-3">🌍 Turoperadores</h4>
+                        <p class="flex-grow-1">Gestiona las agencias asociadas y sus reservas.</p>
+                        <a href="TuroperadorServlet" class="btn btn-info text-white w-100 mt-auto">Ir a Turoperadores</a>
                     </div>
                 </div>
             </div>
@@ -85,18 +104,9 @@
             <div class="col-md-3 d-flex">
                 <div class="card shadow border-0 flex-fill">
                     <div class="card-body d-flex flex-column">
-                        <h4 class="fw-semibold mb-3">🗓️ Reporte Mes</h4>
-                        <p class="flex-grow-1">Muestra el mes del año pasado con más clientes por nacionalidad.</p>
-                        <a href="ReporteMesServlet" class="btn btn-success w-100 mt-auto">Ver Reporte</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 d-flex">
-                <div class="card shadow border-0 flex-fill">
-                    <div class="card-body d-flex flex-column">
-                        <h4 class="fw-semibold mb-3">🚻 Reporte por Sexo</h4>
-                        <p class="flex-grow-1">Muestra el sexo más frecuente por nacionalidad en el año actual.</p>
-                        <a href="ReporteSexoServlet" class="btn btn-secondary w-100 mt-auto">Ver Reporte</a>
+                        <h4 class="fw-semibold mb-3">📊 Reportes</h4>
+                        <p class="flex-grow-1">Consulta los reportes detallados de desempeño del hotel.</p>
+                        <a href="ReporteServlet" class="btn btn-secondary w-100 mt-auto">Ver Reportes</a>
                     </div>
                 </div>
             </div>

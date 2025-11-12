@@ -73,8 +73,20 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">ID Turoperador (opcional):</label>
-                    <input type="number" name="idTuroperador" class="form-control">
+                    <label class="form-label fw-semibold">Turoperador (opcional):</label>
+                    <select name="id_turoperador" class="form-select">
+                        <option value="">-- Sin turoperador --</option>
+                        <%
+                            List<modelo.Turoperador> turops = (List<modelo.Turoperador>) request.getAttribute("turoperadores");
+                            if (turops != null) {
+                                for (modelo.Turoperador t : turops) {
+                        %>
+                            <option value="<%= t.getId() %>"><%= t.getNombre() %> (<%= t.getCodigo() %>)</option>
+                        <%
+                                }
+                            }
+                        %>
+                    </select>
                 </div>
 
                 <div class="mb-3">

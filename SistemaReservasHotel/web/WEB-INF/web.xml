@@ -58,6 +58,26 @@
         <servlet-name>ReporteServlet</servlet-name>
         <url-pattern>/ReporteServlet</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>ReporteTuroperadorServlet</servlet-name>
+        <servlet-class>controladores.ReporteTuroperadorServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReporteTuroperadorServlet</servlet-name>
+        <url-pattern>/ReporteTuroperadorServlet</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>TuroperadorServlet</servlet-name>
+        <servlet-class>controladores.TuroperadorServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>TuroperadorServlet</servlet-name>
+        <url-pattern>/TuroperadorServlet</url-pattern>
+    </servlet-mapping>
 
     <!-- Página por defecto -->
     <welcome-file-list>
