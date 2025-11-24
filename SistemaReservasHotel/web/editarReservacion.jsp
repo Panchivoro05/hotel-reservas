@@ -32,7 +32,7 @@
 <div class="container mt-5">
     <div class="card shadow mx-auto" style="max-width: 600px;">
         <div class="card-header bg-warning text-white">
-            <h5 class="mb-0">✏️ Editar Reservación</h5>
+            <h5 class="mb-0">Editar Reservación</h5>
         </div>
 
         <div class="card-body">
@@ -63,7 +63,7 @@
 
                 <div class="d-grid">
                     <button type="submit" class="btn btn-warning text-white fw-semibold">
-                        💾 Guardar Cambios
+                        Guardar Cambios
                     </button>
                 </div>
             </form>
