@@ -14,7 +14,10 @@ pipeline {
             steps {
                 dir('SistemaReservasHotel') {
                     bat """
-                    C:\\ProgramData\\Jenkins\\.jenkins\\tools\\hudson.tasks.Ant_AntInstallation\\Ant\\bin\\ant.bat clean dist
+                    C:\\ProgramData\\Jenkins\\.jenkins\\tools\\hudson.tasks.Ant_AntInstallation\\Ant\\bin\\ant.bat ^
+                        -Dj2ee.server.home=D:/tomcat/apache-tomcat-10.1.48 ^
+                        -Dlibs.CopyLibs.classpath=D:/Users/Rodrigo/Downloads/netbeans/netbeans/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar ^
+                        clean dist
                     """
                 }
             }
@@ -26,7 +29,7 @@ pipeline {
                     def war = "SistemaReservasHotel/dist/SistemaReservasHotel.war"
                     def tomcatUser = "admin"
                     def tomcatPass = "admin123"
-                    def tomcatUrl  = "http://localhost:8080/manager/text/deploy?path=/hotel&update=true"
+                    def tomcatUrl = "http://localhost:8080/manager/text/deploy?path=/hotel&update=true"
 
                     bat """
                     curl -u ${tomcatUser}:${tomcatPass} -T ${war} "${tomcatUrl}"
@@ -36,3 +39,4 @@ pipeline {
         }
     }
 }
+
