@@ -17,6 +17,7 @@ pipeline {
                     C:\\ProgramData\\Jenkins\\.jenkins\\tools\\hudson.tasks.Ant_AntInstallation\\Ant\\bin\\ant.bat ^
                         -Dj2ee.server.home=D:/tomcat/apache-tomcat-10.1.48 ^
                         -Dlibs.CopyLibs.classpath=D:/Users/Rodrigo/Downloads/netbeans/netbeans/java/ant/extra/org-netbeans-modules-java-j2seproject-copylibstask.jar ^
+                        -Dlibs.CopyLibs2.classpath=D:/Users/Rodrigo/Downloads/netbeans/netbeans/java/ant/extra/org-netbeans-modules-javawebstart-anttasks.jar ^
                         clean dist
                     """
                 }
